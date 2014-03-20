@@ -1,6 +1,6 @@
 /****
  *
- *   Arduino Realtime Clock Calibration v0.10
+ *   Arduino Realtime Clock Calibration v0.20
  *
  *   Copyright 2014 by D. L. Ehnebuske 
  *   License terms: Creative Commons Attribution-ShareAlike 3.0 United States (CC BY-SA 3.0 US) 
@@ -104,7 +104,7 @@
  *
  ****/
 #define SETTINGS_TAG (0xA020)                  // Tag marking the settings structure as ours
-#define VERSION_STRING "RTC Calibrate v0.10."  // Name and version of this sketch
+#define VERSION_STRING "RTC Calibrate v0.20."  // Name and version of this sketch
 
 /****
  *

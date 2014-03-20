@@ -1,6 +1,6 @@
 /****
  *
- *   Escapement v1.26
+ *   Escapement v1.27
  *
  *   Copyright 2014 by D. L. Ehnebuske 
  *   License terms: Creative Commons Attribution-ShareAlike 3.0 United States (CC BY-SA 3.0 US) 
@@ -187,7 +187,7 @@
  *
  ****/
 #define SETTINGS_TAG (0xA020)                  // Tag marking the settings structure as ours
-#define VERSION_STRING "Escapement v1.26."     // Name and version of this sketch
+#define VERSION_STRING "Escapement v1.27."     // Name and version of this sketch
 #define NORMAL_BEAT_COLOR RGB_LED_GREEN        // The normal beat flash color is green
 #define CAL_BEAT_COLOR RGB_LED_YELLOW          // The calibration flash color is yellow
 
@@ -379,13 +379,13 @@ void onButton(void (*fButton[])()) {
 void fPower() {
   if (adjustable) {
     if (speedAdj != 0) {
-    Serial.print("Changing beat duration by: ");
+    Serial.print("Changing clock speed by: ");
     Serial.print(speedAdj/10.0, 1);
     Serial.print(" s/day from ");
     Serial.print(b.getBeatDuration());
-    Serial.print(" us to ");
+    Serial.print(" us/beat to ");
     Serial.print(b.incrBeatDuration(speedAdj));
-    Serial.println(" us.");
+    Serial.println(" us/beat.");
     writeEEPROM();
     speedAdj = 0;
     }
@@ -436,7 +436,7 @@ void fC() {
 // "Up" button: Increase beat duration by adjustment step size seconds per day
 void fUp() {
   if (adjustable) {
-    Serial.print("Increasing beat duration adjustment by: ");
+    Serial.print("Increasing clock speed adjustment by: ");
     Serial.print(stepSize[stepix]/10.0, 1);
     Serial.print(" s/day to ");
     Serial.print((speedAdj += stepSize[stepix])/10.0, 1);
@@ -447,7 +447,7 @@ void fUp() {
 // "Down" button: Decrease beat duration by adjustment step size seconds per day
 void fDown() {
   if (adjustable) {
-    Serial.print("Decreasing beat duration adjustment by: ");
+    Serial.print("Decreasing clock speed adjustment by: ");
     Serial.print(stepSize[stepix]/10.0, 1);
     Serial.print(" s/day to ");
     Serial.print((speedAdj -= stepSize[stepix])/10.0, 1);
