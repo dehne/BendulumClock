@@ -160,7 +160,7 @@
  *
  ****/
 #define CS_PIN       (2)                       // The jumper that tells whether we should do a cold start is on pin 2
-#define IR_PIN       (3)                       // The IR receiver is attached to pin 9
+#define IR_PIN       (3)                       // The IR receiver is attached to pin 3
 #define LED_R_PIN    (9)                       // The pin to which the red LED is hooked
 #define LED_G_PIN    (6)                       // The pin to which the green LED is hooked
 #define LED_B_PIN    (5)                       // The pin to which the blue LED is hooked
