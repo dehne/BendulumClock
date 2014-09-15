@@ -1,6 +1,6 @@
 /****
  *
- *   BendulumClock v0.10
+ *   BendulumClock v1.00
  *
  *   Copyright 2014 by D. L. Ehnebuske 
  *   License terms: Creative Commons Attribution-ShareAlike 3.0 United States (CC BY-SA 3.0 US) 
@@ -186,7 +186,7 @@
  * Other constants
  *
  ****/
-#define VERSION_STRING F("BendulumClock v0.20.") // Name and version of this sketch
+#define VERSION_STRING F("BendulumClock v1.00.") // Name and version of this sketch
 #define NORMAL_BEAT_COLOR RGB_LED_GREEN          // The normal beat flash color is green
 #define CAL_BEAT_COLOR RGB_LED_YELLOW            // The calibration flash color is yellow
 
@@ -230,8 +230,8 @@ void setup() {
     case RUN:                                    //   Case RUN
       ledBeatColor = NORMAL_BEAT_COLOR;          //     Set beat flash color to normal
       Serial.print(F("Hot starting using "));    //     Say we're off and running
-      Serial.print(e.getBeatDuration()/1000000.0, 5);
-      Serial.print(F(" seconds per beat and a peak scaling of "));
+      Serial.print(e.getAvgBpm(), 4);            //     Show calibrated beats per minute and peak scaling
+      Serial.print(F(" bpm and a peak scaling of "));
       Serial.println(e.getPeakScale());
       break;
       
@@ -311,7 +311,7 @@ void fC() {
   }
 }
 
-// "Up" button: Increase beat duration by adjustment step size seconds per day
+// "Up" button: Increase beat duration by adjustment stepSize[stepIx] tenths of a seconds per day
 void fUp() {
   if (adjustable) {
     Serial.print(F("Increasing clock speed adjustment by: "));
@@ -322,7 +322,7 @@ void fUp() {
   }
 }
 
-// "Down" button: Decrease beat duration by adjustment step size seconds per day
+// "Down" button: Decrease beat duration by adjustment stepSize[stepIx] tenths of a seconds per day
 void fDown() {
   if (adjustable) {
     Serial.print(F("Decreasing clock speed adjustment by: "));
@@ -364,7 +364,7 @@ void fRight() {
 //  Select: Start a calibration run
 void fSelect () {
   if (adjustable) {
-    e.setRunMode(WARMSTART);                         //   Do a scaling followed by a calibration
+    e.setRunMode(WARMSTART);                     //   Do a scaling followed by a calibration
     ledBeatColor = CAL_BEAT_COLOR;               //   Set flash color to match mode
     Serial.println(F("Starting calibration run."));
     Serial.println(F("Adjustments: off."));
@@ -408,29 +408,29 @@ void loop() {
       case WARMSTART:                                  //   When settling in
         Serial.print(F("Settling. Count "));           //     Say that we're settling in and how far along we've gotten
         Serial.print(e.getCycleCounter());
-        Serial.print(F(", delta "));                  //     Display the ratio of tick duration to tock duration
+        Serial.print(F(", delta "));                   //     Display the ratio of tick duration to tock duration
         Serial.print(e.getDelta(), 4);
-        Serial.print(F(", current bpm "));            //       and the measured beats per minute
+        Serial.print(F(", current bpm "));             //       and the measured beats per minute
         Serial.print(e.getCurBpm(), 4);
         break;
       case SCALE:                                      //   When scaling for peak value
-        Serial.print(F("Scaling. Count "));           //    Say that we're scaling and how far along we've gotten
+        Serial.print(F("Scaling. Count "));            //    Say that we're scaling and how far along we've gotten
         Serial.print(e.getCycleCounter());
-        Serial.print(F(", delta "));                  //    Display the ratio of tick duration to tock duration
+        Serial.print(F(", delta "));                   //    Display the ratio of tick duration to tock duration
         Serial.print(e.getDelta(), 4);
-        Serial.print(F(", current bpm "));            //      the measured beats per minute
+        Serial.print(F(", current bpm "));             //      the measured beats per minute
         Serial.print(e.getCurBpm(), 4);
-        Serial.print(F(", peak scaling "));           //      and the current peak scaling
+        Serial.print(F(", peak scaling "));            //      and the current peak scaling
         Serial.print(e.getPeakScale());
         break;
       case CALIBRATE:                                  //   When calibrating
-        Serial.print(F("Calibrating. Count "));       //     Say we're calibrating, how much smoothing We've been
+        Serial.print(F("Calibrating. Count "));        //     Say we're calibrating, how much smoothing We've been
         Serial.print(e.getCycleCounter());             //       able to do so far, how symmetrical the "ticks" and
-        Serial.print(F(", delta "));                  //       "tocks" are currently, how many beats per minute
+        Serial.print(F(", delta "));                   //       "tocks" are currently, how many beats per minute
         Serial.print(e.getDelta(), 4);                 //       on average we're seeing so far
         Serial.print(F(", average bpm "));
         Serial.print(e.getAvgBpm(), 4);
-        Serial.print(F(", temp "));                   //       and the temperature
+        Serial.print(F(", temp "));                    //       and the temperature
         Serial.print(e.getTemp());
         Serial.print(F(" C"));
         ledBeatColor = RGB_LED_BLUE;
@@ -442,16 +442,16 @@ void loop() {
         Serial.print(e.getCurBpm(), 4);
         Serial.print(F(", peak scaling "));
         Serial.print(e.getPeakScale());
-        ledBeatColor = NORMAL_BEAT_COLOR;              //     Change beat flash color to normal -- green
         break;
       case RUN:                                        //   When running
-        Serial.print(F("Running. Cal bpm "));         //     Say that we're running along normally and what the
+        Serial.print(F("Running. Cal bpm "));          //     Say that we're running along normally and what the
         Serial.print(e.getAvgBpm(), 4);                //       calibrated beats per minute is and what the currently
-        Serial.print(F(", current bpm "));            //       measured bpm is and the temperature reading
+        Serial.print(F(", current bpm "));             //       measured bpm is and the temperature reading
         Serial.print(e.getCurBpm(), 4);
         Serial.print(F(", temp "));
         Serial.print(e.getTemp());
         Serial.print(F(" C"));
+        ledBeatColor = NORMAL_BEAT_COLOR;              //     Change beat flash color to normal -- green
         break;
     }
     Serial.println(F("."));
