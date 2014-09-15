@@ -22,7 +22,8 @@ narrow dimension and the motion is most pronounced at the top.
 
 Like a pendulum a bendulum is approximately isochronous, meaning that its period is not 
 too dependent on the amplitude of its swing or on the ambient temperature. Also like a 
-pendulum, a bendulum is more accurately isochronous if the swing amplitude is small.
+pendulum, a bendulum is more accurately isochronous if the swing amplitude is small and 
+the temperature is constant.
 
 Since a bendulum is close to isochronous, its periodicity can be used to drive a clock. To 
 do so it needs to be equipped with a mechanism that does two things. It needs to detect 
@@ -44,16 +45,22 @@ clock movement that moves the clock's hands.
 
 ## What's in the collection of sketches and what do they do?
 
+### BendulumClock
+
+The BendulumClock sketch implements a complete, automatically calibrating, temperature
+compensated bendulum clock. It drives the bendulum so that it keeps going and uses the 
+calibrated length of each beat to to drive the clock movement to advance the hands 
+of the clock. The sketch supports an IR remote control that can be used to regulate and 
+adjust the clock. Finally, it implements automatic temperature-compensated calibration to 
+determine the length of the bendulum's beat using the Arduino's built in realtime clock. The 
+realtime clock isn't accurate enough to do the full job out of the box, but it can itself be 
+easily calibrated using the RealTimeClockCal sketch, below.
+
 ### Escapement
 
-The Escapement sketch is the main sketch for the project. In normal operation, bendulum 
-clocks run this sketch. As mentioned above, it drives the bendulum so that it keeps going 
-and uses the assumed length of each beat to to drive the clock movement to advance the hands 
-of the clock. The sketch implements IR remote control to let the clock be regulated and 
-adjusted using an IR remote control. Finally, it implements automatic calibration to determine 
-the length of the bendulum's beat using the Arduino's built in realtime clock. The realtime 
-clock isn't accurate enough to do the full job, but it is good enough to serve as a starting 
-point for regulating the clock.
+The Escapement sketch was the first main sketch for the project. It is largely the same as the 
+BendulumClock sketch, above, but is not temperature compensated. In normal operation, bendulum 
+clocks can run this sketch but they will drift if the temperature changes by a few degrees C. 
 
 ### DriveBendulum
 
@@ -68,16 +75,13 @@ clock movement.
 
 ### RealtimeClockCal
 
-As mentioned above, the realtime clock in the Arduino Uno is not accurate enough for the 
+As mentioned above, the real-time clock in the Arduino Uno is not accurate enough for the 
 automatic calibration to work perfectly. This sketch gets around that problem by calibrating 
-the Arduino's realtime clock. It works very much like the Escapement sketch except that it 
-drives the clock movement directly from the Arduino's realtime clock instead of from the 
+the Arduino's real-time clock. It works very much like the BendulumClock sketch except that it 
+drives the clock movement directly from the Arduino's real-time clock instead of from the 
 bendulum. When you use the IR remote to regulate the clock to make it run at the correct 
-speed, the sketch calculates the adjustment factor needed to make the realtime clock run at 
+speed, the sketch calculates the adjustment factor needed to make the real-time clock run at 
 the correct speed. It stores this information in the Arduino's EEPROM where it will be picked 
-up by the Escapement sketch, making the automatic calibration much more accurate. An accurate 
+up by the BendulumClock sketch, making the automatic calibration much more accurate. An accurate 
 automatic calibration means it will take fewer steps to regulate the clock when it runs using 
 the bendulum as its isochronous element.
-
-It's probably only worthwhile using this sketch if you are experimenting with different 
-bendulums and therefore are doing automatic calibrations quite a bit.
