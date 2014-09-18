@@ -52,15 +52,10 @@ compensated bendulum clock. It drives the bendulum so that it keeps going and us
 calibrated length of each beat to to drive the clock movement to advance the hands 
 of the clock. The sketch supports an IR remote control that can be used to regulate and 
 adjust the clock. Finally, it implements automatic temperature-compensated calibration to 
-determine the length of the bendulum's beat using the Arduino's built in realtime clock. The 
-realtime clock isn't accurate enough to do the full job out of the box, but it can itself be 
-easily calibrated using the RealTimeClockCal sketch, below.
-
-### Escapement
-
-The Escapement sketch was the first main sketch for the project. It is largely the same as the 
-BendulumClock sketch, above, but is not temperature compensated. In normal operation, bendulum 
-clocks can run this sketch but they will drift if the temperature changes by a few degrees C. 
+determine the length of the bendulum or pendulum's beat using the Arduino's built in 
+real-time clock. The real-time clock isn't accurate enough to do the full job out of the 
+box, so the sketch implements a simple-to-use process that lets you a one-time calibration 
+of the real-time clock of the Adruino.
 
 ### DriveBendulum
 
@@ -73,15 +68,21 @@ This sketch tests to see that the clock movement can be driven to move the hands
 and lets you adjust a trim pot on the shield to set the strength of the pulses that drive the 
 clock movement.
 
+### DumpEeprom
+
+This sketch produces a formatted dump of the contents of the Arduino EEPROM as saved there by 
+the BendulumClock sketch. It's mostly useful as a diagnostic.
+
+### Escapement
+
+The Escapement sketch was the first main sketch for the project. It is now obsolete. It is 
+largely the same as the BendulumClock sketch, above, but is not temperature compensated. In 
+normal operation, bendulum clocks can run this sketch but they will drift if the temperature 
+changes by a few degrees C. Also, it uses the now-obsolete Bendulum library.
+
 ### RealtimeClockCal
 
 As mentioned above, the real-time clock in the Arduino Uno is not accurate enough for the 
 automatic calibration to work perfectly. This sketch gets around that problem by calibrating 
-the Arduino's real-time clock. It works very much like the BendulumClock sketch except that it 
-drives the clock movement directly from the Arduino's real-time clock instead of from the 
-bendulum. When you use the IR remote to regulate the clock to make it run at the correct 
-speed, the sketch calculates the adjustment factor needed to make the real-time clock run at 
-the correct speed. It stores this information in the Arduino's EEPROM where it will be picked 
-up by the BendulumClock sketch, making the automatic calibration much more accurate. An accurate 
-automatic calibration means it will take fewer steps to regulate the clock when it runs using 
-the bendulum as its isochronous element.
+the Arduino's real-time clock. It is no longer needed because real-time clock calibration is 
+implemented in the BendulumClock sketch.
