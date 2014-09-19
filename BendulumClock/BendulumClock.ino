@@ -159,9 +159,9 @@
  *
  *   If your clock has been running a while but you make a change to the benuluum or pendulum so that its beat duration
  *   changes, you'll need to recalibrate to determine the new rate. This is most easily done by hot starting the clock and 
- *   then pressing the Select button. This will start a clalibration run to calculate the beat duration and peakScaling. 
+ *   then pressing the Select button. This will start a calibration run to calculate the beat duration and peakScaling. 
  *   Once the calibration run is complete, the calibration values will be stored in EEPROM. You'll then need to fine tune
- *   the running speed with using the remote.
+ *   the running speed with using the remote. Also see http://xkcd.com/1421/
  *
  ****/
 
