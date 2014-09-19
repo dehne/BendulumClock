@@ -419,16 +419,17 @@ void fSelect () {
     if (adjRTC) {
       adjRTC = false;                              //   If in RTC calibration switch to warm start
       e.setRunMode(WARMSTART);
-      ledBeatColor = CAL_BEAT_COLOR;
+      ledBeatColor = WARM_BEAT_COLOR;
       Serial.println(F("Redoing beat calibration."));
     } else {                                       //   Otherwise switch to RTC calibration mode
       adjRTC = true;
-      e.setRunMode(WARMSTART);
-      ledBeatColor = WARM_BEAT_COLOR;
+      e.setRunMode(CALRTC);
+      ledBeatColor = RTC_BEAT_COLOR;
       Serial.println(F("Starting real-time clock calibration."));
     }
     Serial.println(F("Adjustments: off."));        //   In either case, turn adjustments off and let things run
     led.setColor(RGB_LED_BLACK);
+    speedAdj = 0;
     adjustable = false;
   }
 }
