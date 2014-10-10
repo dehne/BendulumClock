@@ -2,7 +2,7 @@
  *
  * Directly drive a Lavet motor clock mechanism attached to a bendulum shield.
  *
- *   Copyright 2014 by D. L. Ehnebuske 
+ *   DriveClock v 1.0 Copyright 2014 by D. L. Ehnebuske 
  *   License terms: Creative Commons Attribution-ShareAlike 3.0 United States (CC BY-SA 3.0 US) 
  *                  See http://creativecommons.org/licenses/by-sa/3.0/us/ for specifics. 
  *
@@ -11,9 +11,10 @@
 /****
  *    Constants
  ****/
-#define LED_PIN (13)                           // LED is on pin 13
-#define TICK_PIN (11)                          // The pin to pulse to tick the clock forward one second
-#define TOCK_PIN (10)                          // The pin to pulse to tock the clock forward one second
+#define LED_PIN    (13)                         // Built-in LED is on pin 13
+#define TICK_PIN   (11)                         // The pin to pulse to tick the clock forward one second
+#define TOCK_PIN   (10)                         // The pin to pulse to tock the clock forward one second
+#define PULSE_TIME (40)                         // Duration in ms of pulses
 
 
 void setup() {
@@ -38,19 +39,17 @@ void setup() {
  ****/
 
 void stepClock() {
-                                                // Step parameters
-  const int pulseTime = 40;                     // Duration in ms of pulses
   
   static boolean tick = true;                   // Whether the lavet motor needs a tick or a tock
   
   digitalWrite(LED_PIN, HIGH);                  // Turn on LED
   if (tick) {
     digitalWrite(TICK_PIN, HIGH);               // Issue a tick pulse
-    delay(pulseTime);
+    delay(PULSE_TIME);
     digitalWrite(TICK_PIN, LOW);
   } else {
     digitalWrite(TOCK_PIN, HIGH);               // Issue a tock pulse
-    delay(pulseTime);
+    delay(PULSE_TIME);
     digitalWrite(TOCK_PIN, LOW);
   }
   digitalWrite(LED_PIN, LOW);                   // Turn off LED
