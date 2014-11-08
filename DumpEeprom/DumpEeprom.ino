@@ -4,25 +4,29 @@
  *
  ****/ 
 
-#define SKETCH_ID  F("Dump BendulumClock EEPROM. V0.10")
+#define SKETCH_ID  F("Dump BendulumClock EEPROM. V0.20")
 
 #include <Escapement.h>                        // Escapement library (needed for settings_t definition)
 #include <avr/eeprom.h>                        // EEPROM read write library
-#include <Wire.h>;                                 // Trick IDE into including Wire library (needed by Escapement)
-
-	int id;									// ID tag to know whether data (probably) belongs to this sketch
-	int bias;								// Empirically determined correction factor for the real-time clock in 0.1 s/day
-	int peakScale;							// Empirically determined scaling factor for peak induced voltage
-	long deltaUspb;							// Speed adjustment factor, μs per beat
-	bool compensated;						// Set to true if the Escapement is temperature compensated, else false
-	long uspb[TEMP_STEPS];					// Empirically determined, temp-dependent, μs per beat.
-	int curSmoothing[TEMP_STEPS];			// Current temp-dependent smoothing factor
-
+#include <Wire.h>;                             // Trick IDE into including Wire library (needed by Escapement)
 
 settings_t eeprom;                             // The structure into which we read the EEPROM contents
 
 // Setup function -- called upon power-on and reset
 void setup() {
+  
+  float temp = 0.0;
+  float uspb = 0.0;
+  float slope = 0.0;
+  float intercept = 0.0;
+  
+//linear regression variables
+  float xSum = 0.0;
+  float ySum = 0.0;
+  float xxSum = 0.0;
+  float xySum = 0.0;
+  int count = 0;
+
   Serial.begin(9600);                          // Prep for writing to console
   Serial.println(SKETCH_ID);                   // Say who we are
   eeprom_read_block((void*)&eeprom, (const void*)0, sizeof(eeprom)); // Read from EEPROM
@@ -37,21 +41,43 @@ void setup() {
   Serial.print(F(" usec, "));
   if (eeprom.compensated) {
     Serial.println(F("temperature compensated. Calibration:"));
-    Serial.println(F("Temp\tus/b\tSmooth"));
+    Serial.println(F("Temp\tus/b"));
     for (int i = 0; i < TEMP_STEPS; i++) {
-      if (eeprom.curSmoothing[i] > 1) {
-        Serial.print(TEMP_MIN + i*0.5, 1);
+      if (eeprom.uspb[i] > 0) {
+        temp = TEMP_MIN + i * 0.5;
+        Serial.print(temp, 1);
         Serial.print(F("\t"));
-        Serial.print(eeprom.uspb[i]);
-        Serial.print(F("\t"));
-        Serial.println(eeprom.curSmoothing[i]);
+        Serial.println(eeprom.uspb[i]);
+        uspb = float (eeprom.uspb[i]);
+        xSum += temp;
+        ySum += uspb;
+        xxSum += temp * temp;
+        xySum += temp * uspb;
+        count++;
       }
+    }
+    if (count > 1) {
+      slope = (count * xySum - xSum * ySum) / (count * xxSum - xSum * xSum);
+      intercept = (ySum - slope * xSum) / count;
+      Serial.print(F("Based on "));
+      Serial.print(count);
+      Serial.print(F(" calibration points, a linear model says uspb = "));
+      Serial.print(slope, 4);
+      Serial.print(F(" * temp + "));
+      Serial.println(intercept, 4);
+      Serial.println(F("Temp\tus/b"));
+      for (int i = 0; i < TEMP_STEPS; i++) {
+        temp = TEMP_MIN + i * 0.5;
+        Serial.print(temp, 1);
+        Serial.print(F("\t"));
+        Serial.println(long (slope * temp + intercept));
+      }
+    } else {
+      Serial.println("Not enough calibration data to do a calibration fit.");
     }
   } else {
     Serial.print(F("not temperature compensated, Calibration: "));
-    Serial.print(eeprom.uspb[0]);
-    Serial.print(F(" us/beat, smoothing: "));
-    Serial.println(eeprom.curSmoothing[0]);
+    Serial.println(eeprom.uspb[0]);
   }
 }
 
