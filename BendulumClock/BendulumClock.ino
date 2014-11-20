@@ -1,6 +1,6 @@
 /****
  *
- *   BendulumClock v1.13
+ *   BendulumClock v1.14
  *
  *   Copyright 2014 by D. L. Ehnebuske 
  *   License terms: Creative Commons Attribution-ShareAlike 3.0 United States (CC BY-SA 3.0 US) 
@@ -208,7 +208,7 @@
  * Other constants
  *
  ****/
-#define VERSION_STRING F("BendulumClock v1.13.") // Name and version of this sketch
+#define VERSION_STRING F("BendulumClock v1.14.") // Name and version of this sketch
 #define COLD_BEAT_COLOR   RGB_LED_RED            // The cold start flash color is red
 #define WARM_BEAT_COLOR   RGB_LED_YELLOW         // The warm start flash color is yellow
 #define CAL_BEAT_COLOR    RGB_LED_BLUE           // The calibration flash color is blue
@@ -446,7 +446,7 @@ void loop() {
   static int codeCount = sizeof(code)/sizeof(code[0]);
   byte cix;                                            // Current led color
 
-  c.driveMicros(e.beat());                             // Let bendulum do one beat; move the clock forward however long it took
+  c.driveMicros(e.beat());                             // Let the bendulum do its thing, move the clock forward however long it took
   if (remote.onButton(code, fPointer, codeCount)) {    // If an IR remote buttonwas pushed
     cix = led.getColor();
     led.setColor(RGB_LED_BLACK);                       //   White flash led then return it to its former color to let
@@ -466,7 +466,7 @@ void loop() {
       break;
     case WARMSTART:                                  //   When settling in
       Serial.print(F("Warm start. Count "));         //    Say that we're scaling and how far along we've gotten
-      Serial.print(e.getbeatCounter());
+      Serial.print(e.getBeatCounter());
       Serial.print(F(", delta "));                   //    Display the ratio of tick duration to tock duration
       Serial.print(e.getDelta(), 4);
       Serial.print(F(", current bpm "));             //      the measured beats per minute
@@ -476,14 +476,14 @@ void loop() {
       break;
     case CALIBRATE:                                  //   When calibrating
       Serial.print(F("Calibrating. Count "));        //     Say we're calibrating, how much smoothing We've been
-      Serial.print(e.getbeatCounter());              //       able to do so far, how symmetrical the "ticks" and
+      Serial.print(e.getBeatCounter());              //       able to do so far, how symmetrical the "ticks" and
       Serial.print(F(", delta "));                   //       "tocks" are currently, how many beats per minute
       Serial.print(e.getDelta(), 4);                 //       on average we're seeing so far
       Serial.print(F(", average bpm "));
       Serial.print(e.getAvgBpm(), 4);
       if (e.isTempComp()) {
         Serial.print(F(", temp "));                  //       and the temperature, if running temp compensated
-        Serial.print(e.getTemp());
+        Serial.print(e.getTemp(), 4);
         Serial.print(F(" C"));
       }
       ledBeatColor = RGB_LED_BLUE;
@@ -492,7 +492,7 @@ void loop() {
       Serial.print(F("Finished calibrating. "));
       if (e.isTempComp()) {
         Serial.print(F("Temp: "));
-        Serial.print(e.getTemp());
+        Serial.print(e.getTemp(), 4);
         Serial.print(F(" C, "));
       }
       Serial.print(F("average bpm "));
@@ -502,12 +502,12 @@ void loop() {
       break;
     case RUN:                                        //   When running
       Serial.print(F("Running. Cal bpm "));          //     Say that we're running along normally, 
-      Serial.print(e.getAvgBpm(), 4);                //       what the calibrated beats per minute is,
-      Serial.print(F(", current bpm "));             //       what the currently measured bpm is,
+      Serial.print(e.getBeatBpm(), 4);               //       what the calibrated beats per minute is,
+      Serial.print(F(", current bpm "));             //       what the currentl real-time clock measured bpm is,
       Serial.print(e.getCurBpm(), 4);
       if (e.isTempComp()) {                          //       and, if running temp compensated, 
         Serial.print(F(", temp "));
-        Serial.print(e.getTemp());                   //       the temperature reading.
+        Serial.print(e.getTemp(), 4);                //       the temperature reading.
         Serial.print(F(" C"));
       }
       ledBeatColor = NORMAL_BEAT_COLOR;              //     Change beat flash color to normal -- green
