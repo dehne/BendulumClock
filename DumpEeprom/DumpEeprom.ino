@@ -1,10 +1,10 @@
 /****
  *
- * Sketch to dump and format the contents of the Arduino EEPROM used by BendulumClock
+ * Sketch to dump and format the contents of the Arduino EEPROM used by BendulumClock; Calculate least squares model.
  *
  ****/ 
 
-#define SKETCH_ID  F("Dump BendulumClock EEPROM. V0.20")
+#define SKETCH_ID  F("Dump BendulumClock EEPROM. V0.30")
 
 #include <Escapement.h>                        // Escapement library (needed for settings_t definition)
 #include <avr/eeprom.h>                        // EEPROM read write library
@@ -44,8 +44,8 @@ void setup() {
     Serial.println(F("Temp\tus/b"));
     for (int i = 0; i < TEMP_STEPS; i++) {
       if (eeprom.uspb[i] > 0) {
-        temp = TEMP_MIN + i * 0.5;
-        Serial.print(temp, 1);
+        temp = eeprom.temp[i] / 256.0;
+        Serial.print(temp, 4);
         Serial.print(F("\t"));
         Serial.println(eeprom.uspb[i]);
         uspb = float (eeprom.uspb[i]);
@@ -65,13 +65,6 @@ void setup() {
       Serial.print(slope, 4);
       Serial.print(F(" * temp + "));
       Serial.println(intercept, 4);
-      Serial.println(F("Temp\tus/b"));
-      for (int i = 0; i < TEMP_STEPS; i++) {
-        temp = TEMP_MIN + i * 0.5;
-        Serial.print(temp, 1);
-        Serial.print(F("\t"));
-        Serial.println(long (slope * temp + intercept));
-      }
     } else {
       Serial.println("Not enough calibration data to do a calibration fit.");
     }
