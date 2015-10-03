@@ -1,8 +1,8 @@
 /****
  *
- *   BendulumClock v1.14
+ *   BendulumClock v1.15
  *
- *   Copyright 2014 by D. L. Ehnebuske 
+ *   Copyright 2014-2015 by D. L. Ehnebuske 
  *   License terms: Creative Commons Attribution-ShareAlike 3.0 United States (CC BY-SA 3.0 US) 
  *                  See http://creativecommons.org/licenses/by-sa/3.0/us/ for specifics. 
  *
@@ -130,7 +130,7 @@
  *
  *   During normal operation, the clock will automatically calibrate its operation to conform with the beat rate of the
  *   pendulum or bendulum it is using. Since the beat rate will vary slightly as the temperature changes, it will
- *   calibratits its operation at each new temperature it encounters. When the LED is flashing green, the clock is being 
+ *   calibrate its operation at each new temperature it encounters. When the LED is flashing green, the clock is being 
  *   driven by the pendulum or the bendulum. When it is flashing blue, the clock is using the RTC to determine the beat 
  *   rate at the current temperature. As the clock runs and the temperature varies, the rate at a wide range of 
  *   temperatures will be characterized and the flashing will be all green. At that point the clock is fully calibrated 
@@ -208,7 +208,7 @@
  * Other constants
  *
  ****/
-#define VERSION_STRING F("BendulumClock v1.14.") // Name and version of this sketch
+#define VERSION_STRING F("BendulumClock v1.15.") // Name and version of this sketch
 #define COLD_BEAT_COLOR   RGB_LED_RED            // The cold start flash color is red
 #define WARM_BEAT_COLOR   RGB_LED_YELLOW         // The warm start flash color is yellow
 #define CAL_BEAT_COLOR    RGB_LED_BLUE           // The calibration flash color is blue
@@ -257,8 +257,7 @@ void setup() {
       ledBeatColor = NORMAL_BEAT_COLOR;
       Serial.print(F("Hot starting with beatDelta: "));
       Serial.print(e.getBeatDelta()/10.0, 1);
-      Serial.print(F(" s/day, peak scaling: "));
-      Serial.println(e.getPeakScale());
+      Serial.println(F(" s/day"));
       break;
       
     case WARMSTART:                              // Case SETTLE
@@ -465,20 +464,20 @@ void loop() {
       Serial.print(F("Cold started."));              //    Just say that's what we're doing
       break;
     case WARMSTART:                                  //   When settling in
-      Serial.print(F("Warm start. Count "));         //    Say that we're scaling and how far along we've gotten
+      Serial.print(F("Warming up. Count "));         //    Say that we're warming up and how far along we've gotten
       Serial.print(e.getBeatCounter());
       Serial.print(F(", delta "));                   //    Display the ratio of tick duration to tock duration
       Serial.print(e.getDelta(), 4);
       Serial.print(F(", current bpm "));             //      the measured beats per minute
       Serial.print(e.getCurBpm(), 4);
-      Serial.print(F(", peak scaling "));            //      and the current peak scaling
-      Serial.print(e.getPeakScale());
       break;
     case CALIBRATE:                                  //   When calibrating
       Serial.print(F("Calibrating. Count "));        //     Say we're calibrating, how much smoothing We've been
-      Serial.print(e.getBeatCounter());              //       able to do so far, how symmetrical the "ticks" and
-      Serial.print(F(", delta "));                   //       "tocks" are currently, how many beats per minute
-      Serial.print(e.getDelta(), 4);                 //       on average we're seeing so far
+      Serial.print(e.getSmoothing());                //       able to do so far,
+      Serial.print(F(", delta "));                   //       how symmetrical "ticks" and"tocks" are currently,
+      Serial.print(e.getDelta(), 4);                 //       what the current beat's bpm is as measured by the RTC, 
+      Serial.print(F(", current bpm "));             //       what the average bpm so far is,
+      Serial.print(e.getCurBpm(), 4);
       Serial.print(F(", average bpm "));
       Serial.print(e.getAvgBpm(), 4);
       if (e.isTempComp()) {
@@ -497,8 +496,6 @@ void loop() {
       }
       Serial.print(F("average bpm "));
       Serial.print(e.getAvgBpm(), 4);
-      Serial.print(F(", peak scaling "));
-      Serial.print(e.getPeakScale());
       break;
     case RUN:                                        //   When running
       Serial.print(F("Running. Cal bpm "));          //     Say that we're running along normally, 
@@ -515,7 +512,9 @@ void loop() {
     case CALRTC:                                     //   When calibrating the real-time clock
       Serial.print(F("RTC Calibration. Corr: "));    //     Say that we're calibrating the RTC,
       Serial.print(e.getBias()/10.0, 1);             //       what the current bias is,
-      Serial.print(F(" sec, current Bpm: "));
+      Serial.print(F(" sec, delta "));               //       how symmetrical "ticks" and "tocks" are currently,
+      Serial.print(e.getDelta(), 4);                 //       what the current beat's bpm is as measured by the RTC, 
+      Serial.print(F(", current Bpm: "));
       Serial.print(e.getCurBpm(), 4);                //       and what the current bpm is
       break;
   }

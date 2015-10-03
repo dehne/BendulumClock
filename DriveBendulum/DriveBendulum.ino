@@ -14,7 +14,7 @@
  *
  ****/
 #define SENSE_PIN   (A2)                       // Bendulum coil sensing is through pin A2
-#define LED_PIN    (13)                        // The built-in LED is on pin 13
+#define LED_PIN    (6)                         // The bendulum sheild green LED is on pin 6
 #define KICK_PIN   (12)                        // The pin through which we kick the bendulum magnet through the coil is pin 12
 
 /****
@@ -24,10 +24,10 @@
  ****/
                                                // Voltage spike detection parameters
 #define NOISE_SIZE  (30)                       //   Peak value for expected input noise
-#define SETTLE_TIME (125)                      //   Time (ms) to delay to let things settle before looking for voltage spike
+#define SETTLE_TIME (250)                      //   Time (ms) to delay to let things settle before looking for voltage spike
 
                                                // Kick parameters
-#define DELAY_TIME  (0)                        //   Time in ms by which to delay the start of the kick pulse
+#define DELAY_TIME  (5)                        //   Time in ms by which to delay the start of the kick pulse
 #define KICK_TIME   (50)                       //   Duration in ms of the kick pulse
 
 

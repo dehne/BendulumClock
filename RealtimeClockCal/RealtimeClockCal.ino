@@ -103,8 +103,8 @@
  * Other constants
  *
  ****/
-#define SETTINGS_TAG (0xA020)                  // Tag marking the settings structure as ours
-#define VERSION_STRING "RTC Calibrate v0.20."  // Name and version of this sketch
+#define SETTINGS_TAG (0x3db3)                  // Tag marking the settings structure as ours
+#define VERSION_STRING "RTC Calibrate v0.30."  // Name and version of this sketch
 
 /****
  *
@@ -112,10 +112,12 @@
  *
  ****/
 struct settings_t {                            // Structure of data stored in EEPROM
-  int id;                                      // ID tag to know whether data (probably) belongs to this sketch
-  int rtcCorrection;                           // Emprically determined correction factor for the Arduino rtc (tenths of a sec/day)
-  int peakScale;                               // Empirically determined scaling factor for peak induced voltage
-  long uspb;                                   // Emprically determined duration of a beat in μs
+	unsigned int id;                       // ID tag to know whether data (probably) belongs to this sketch
+	int bias;                              // Empirically determined correction factor for the real-time clock in 0.1 s/day
+	long deltaUspb;                        // Speed adjustment factor, μs per beat
+	bool compensated;                      // Set to true if the Escapement is temperature compensated, else false
+	long uspb[TEMP_STEPS];                 // Empirically determined, temp-dependent, μs per beat.
+	int curSmoothing[TEMP_STEPS];          // Current temp-dependent smoothing factor
 };
 
 /****
