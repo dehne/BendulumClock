@@ -1,6 +1,6 @@
 /****
  *
- *   BendulumClock v1.15
+ *   BendulumClock v1.16
  *
  *   Copyright 2014-2015 by D. L. Ehnebuske 
  *   License terms: Creative Commons Attribution-ShareAlike 3.0 United States (CC BY-SA 3.0 US) 
@@ -208,7 +208,7 @@
  * Other constants
  *
  ****/
-#define VERSION_STRING F("BendulumClock v1.15.") // Name and version of this sketch
+#define VERSION_STRING F("BendulumClock v1.16.") // Name and version of this sketch
 #define COLD_BEAT_COLOR   RGB_LED_RED            // The cold start flash color is red
 #define WARM_BEAT_COLOR   RGB_LED_YELLOW         // The warm start flash color is yellow
 #define CAL_BEAT_COLOR    RGB_LED_BLUE           // The calibration flash color is blue
@@ -244,30 +244,29 @@ void setup() {
   digitalWrite(CS_PIN, HIGH);                    // Turn on pullup resistor. Installing cold start jumper takes this to Gnd
   Serial.begin(9600);                            // Initialize serial communications
   Serial.println(VERSION_STRING);                // Announce ourselves
-  e.enable();                                    // Initialize the Escapement
   if (digitalRead(CS_PIN) == LOW) {              // If it's a forced cold start
-    e.setRunMode(COLDSTART);
+    e.enable(COLDSTART);
+  } else {
+    e.enable();
   }
   
   Serial.print(F("Arduino RTC: "));
   Serial.print(e.getBias()/10.0, 1);             // Display Arduino RTC clock correction
   Serial.println(F(" s/day"));
   switch (e.getRunMode()) {                      // Which runmode are we starting with?
-    case RUN:                                    //   Case RUN
-      ledBeatColor = NORMAL_BEAT_COLOR;
-      Serial.print(F("Hot starting with beatDelta: "));
+      
+    case COLDSTART:                              //   Cold starting
+      Serial.println(F("Cold Starting."));
+      break;
+
+    case WARMSTART:                              //   Warm starting
+      Serial.print(F("Warm starting with manual adjustment of "));
       Serial.print(e.getBeatDelta()/10.0, 1);
       Serial.println(F(" s/day"));
       break;
-      
-    case WARMSTART:                              // Case SETTLE
-      ledBeatColor = WARM_BEAT_COLOR;
-      Serial.println(F("Warm starting with automatic calibration."));
-      break;
 
-    case COLDSTART:                              // Case COLDSTART
-      ledBeatColor = COLD_BEAT_COLOR;
-      Serial.println(F("Cold Starting."));
+    case CALSTART:                               //   Recalibrating
+      Serial.println(F("Auto calibrating."));
       break;
   }
   remote.enable();                               // Enable IR remote
@@ -416,13 +415,11 @@ void fSelect () {
   if (adjustable) {
     if (adjRTC) {
       adjRTC = false;                              //   If in RTC calibration switch to warm start
-      e.setRunMode(WARMSTART);
-      ledBeatColor = WARM_BEAT_COLOR;
-      Serial.println(F("Redoing beat calibration."));
+      e.setRunMode(CALSTART);
+      Serial.println(F("Starting calibration."));
     } else {                                       //   Otherwise switch to RTC calibration mode
       adjRTC = true;
       e.setRunMode(CALRTC);
-      ledBeatColor = RTC_BEAT_COLOR;
       Serial.println(F("Starting real-time clock calibration."));
     }
     Serial.println(F("Adjustments: off."));        //   In either case, turn adjustments off and let things run
@@ -461,18 +458,23 @@ void loop() {
 
   switch (e.getRunMode()) {                          //   Do things based on the current "run mode"
     case COLDSTART:                                  //   When cold starting
-      Serial.print(F("Cold started."));              //    Just say that's what we're doing
+      Serial.print(F("Cold started"));               //    Just say that's what we're doing
+      ledBeatColor = COLD_BEAT_COLOR;
       break;
     case WARMSTART:                                  //   When settling in
-      Serial.print(F("Warming up. Count "));         //    Say that we're warming up and how far along we've gotten
+      Serial.print(F("Warming "));                   //    Say how far along we've gotten in our warm up
       Serial.print(e.getBeatCounter());
       Serial.print(F(", delta "));                   //    Display the ratio of tick duration to tock duration
       Serial.print(e.getDelta(), 4);
       Serial.print(F(", current bpm "));             //      the measured beats per minute
       Serial.print(e.getCurBpm(), 4);
+      ledBeatColor = WARM_BEAT_COLOR;
+      break;
+    case CALSTART:
+      ledBeatColor = CAL_BEAT_COLOR;
       break;
     case CALIBRATE:                                  //   When calibrating
-      Serial.print(F("Calibrating. Count "));        //     Say we're calibrating, how much smoothing We've been
+      Serial.print(F("Calibrating "));               //     Say how much smoothing We've been
       Serial.print(e.getSmoothing());                //       able to do so far,
       Serial.print(F(", delta "));                   //       how symmetrical "ticks" and"tocks" are currently,
       Serial.print(e.getDelta(), 4);                 //       what the current beat's bpm is as measured by the RTC, 
@@ -485,7 +487,7 @@ void loop() {
         Serial.print(e.getTemp(), 4);
         Serial.print(F(" C"));
       }
-      ledBeatColor = RGB_LED_BLUE;
+      ledBeatColor = CAL_BEAT_COLOR;
       break;
     case CALFINISH:                                  //   When finished calibrating
       Serial.print(F("Finished calibrating. "));
@@ -507,15 +509,16 @@ void loop() {
         Serial.print(e.getTemp(), 4);                //       the temperature reading.
         Serial.print(F(" C"));
       }
-      ledBeatColor = NORMAL_BEAT_COLOR;              //     Change beat flash color to normal -- green
+      ledBeatColor = NORMAL_BEAT_COLOR;
       break;
     case CALRTC:                                     //   When calibrating the real-time clock
-      Serial.print(F("RTC Calibration. Corr: "));    //     Say that we're calibrating the RTC,
+      Serial.print(F("Calibrating RTC. Corr: "));    //     Say that we're calibrating the RTC,
       Serial.print(e.getBias()/10.0, 1);             //       what the current bias is,
       Serial.print(F(" sec, delta "));               //       how symmetrical "ticks" and "tocks" are currently,
       Serial.print(e.getDelta(), 4);                 //       what the current beat's bpm is as measured by the RTC, 
       Serial.print(F(", current Bpm: "));
       Serial.print(e.getCurBpm(), 4);                //       and what the current bpm is
+      ledBeatColor = RTC_BEAT_COLOR;
       break;
   }
   Serial.println(F("."));
