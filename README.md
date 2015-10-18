@@ -1,6 +1,6 @@
 # Arduino Sketches for Bendulum Clocks
 
-Sketches for Bendulum Clocks Copyright 2014 by D. L. Ehnebuske  
+Sketches for Bendulum Clocks Copyright 2014-2015 by D. L. Ehnebuske  
 License terms: [Creative Commons Attribution-ShareAlike 3.0 United States (CC BY-SA 3.0 US)]
 (http://creativecommons.org/licenses/by-sa/3.0/us/ "CC BY-SA 3.0 US")
 
@@ -59,13 +59,13 @@ of the real-time clock of the Adruino.
 
 ### DriveBendulum
 
-This sketch tests to see that the bendulum can be driven and lets you adjust a trim pot on 
-the shield to set the strength of the pulses that drive the bendulum.
+This sketch tests to see that the bendulum can be driven and lets you adjust the #define 
+symbol that determines the length of the pulses that drive the bendulum.
 
 ### DriveClock
 
 This sketch tests to see that the clock movement can be driven to move the hands of the clock 
-and lets you adjust a trim pot on the shield to set the strength of the pulses that drive the 
+and lets you adjust the #define symbol that determines the length of the pulses that drive the 
 clock movement.
 
 ### DumpEeprom
@@ -85,4 +85,4 @@ changes by a few degrees C. Also, it uses the now-obsolete Bendulum library.
 As mentioned above, the real-time clock in the Arduino Uno is not accurate enough for the 
 automatic calibration to work perfectly. This sketch gets around that problem by calibrating 
 the Arduino's real-time clock. It is no longer needed because real-time clock calibration is 
-implemented in the BendulumClock sketch.
+implemented in the Escapement library and BendulumClock sketch.
