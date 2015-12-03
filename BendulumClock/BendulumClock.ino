@@ -416,7 +416,6 @@ void fSelect () {
     if (adjRTC) {
       adjRTC = false;                              //   If in RTC calibration switch to warm start
       e.setRunMode(CALSTART);
-      Serial.println(F("Starting calibration."));
     } else {                                       //   Otherwise switch to RTC calibration mode
       adjRTC = true;
       e.setRunMode(CALRTC);
@@ -471,6 +470,7 @@ void loop() {
       ledBeatColor = WARM_BEAT_COLOR;
       break;
     case CALSTART:
+      Serial.println(F("Starting calibration"));
       ledBeatColor = CAL_BEAT_COLOR;
       break;
     case CALIBRATE:                                  //   When calibrating
