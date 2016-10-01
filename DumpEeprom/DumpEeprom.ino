@@ -2,13 +2,13 @@
  *
  * Sketch to dump and format the contents of the Arduino EEPROM used by BendulumClock
  *
- *   Copyright 2014-2015 by D. L. Ehnebuske 
+ *   Copyright 2014-2016 by D. L. Ehnebuske 
  *   License terms: Creative Commons Attribution-ShareAlike 3.0 United States (CC BY-SA 3.0 US) 
  *                  See http://creativecommons.org/licenses/by-sa/3.0/us/ for specifics. 
  *
  ****/ 
 
-#define SKETCH_ID  F("Dump BendulumClock EEPROM. V0.50")
+#define SKETCH_ID  F("Dump BendulumClock EEPROM. V0.85")
 
 #include <Escapement.h>                        // Escapement library (needed for settings_t definition)
 #include <avr/eeprom.h>                        // EEPROM read write library
@@ -39,6 +39,32 @@ void setup() {
         Serial.print(F("\t"));
         Serial.println(eeprom.curSmoothing[i]);
       }
+    }
+    float xSum = 0.0;				//   Have a go at calculating the linear least squares for the data so far
+    float ySum = 0.0;
+    float xxSum = 0.0;
+    float xySum = 0.0;
+    float slope;
+    float yIntercept;
+    int count = 0;
+    for (int i = 0; i < TEMP_STEPS; i++) {
+      if (eeprom.curSmoothing[i] > TGT_SMOOTHING) {
+        float x = (((TEMP_MIN << 1) + i) << 7);
+        float y = eeprom.uspb[i];
+        count++;
+        xSum += x;
+        ySum += y;
+        xxSum += x * x;
+        xySum += x * y;
+      }
+    }
+    if (count >= 1) {				//   If at least one bucket is complete, calculate
+      slope = count > 1 ? (count * xySum - xSum * ySum) / (count * xxSum - xSum * xSum) : 0;
+      yIntercept = (ySum - slope * xSum) / count;
+      Serial.print(F("LSQ model: uspb = "));
+      Serial.print(slope);
+      Serial.print(F(" * t + "));
+      Serial.println(yIntercept);
     }
   } else {
     Serial.print(F("not temperature compensated, Calibration: "));

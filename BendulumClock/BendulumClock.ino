@@ -1,6 +1,6 @@
 /****
  *
- *   BendulumClock v1.16
+ *   BendulumClock v1.20
  *
  *   Copyright 2014-2015 by D. L. Ehnebuske 
  *   License terms: Creative Commons Attribution-ShareAlike 3.0 United States (CC BY-SA 3.0 US) 
@@ -28,8 +28,8 @@
  *   With an electronic escapement the "digital gear train" can be much more flexible, making it possible to utilize just
  *   about whatever pendulum or bendulum we happen to have so long as we can accurately measure how long a beat takes. So, 
  *   instead of holding the gear train constant and adjusting the period of the pendulum/bendulum to make the clock run at 
- *   the correct speed, we let the period be what it is and adjust the "gear train" to advance the clock so that, it 
- *   advances at the correct rate, even though ratio of beats to seconds is not a simple one.
+ *   the correct speed, we let the period be what it is and adjust the "gear train" to advance the clock so it advances at 
+ *   the correct rate, even though ratio of beats to seconds is not a simple one.
  *
  *   But how do you measure the period of your pendulum or bendulum accurately? One way you could do it is to use an 
  *   accurate clock to measure how long it takes for, say, 1000 beats and then work out the math. A more obvious way is to 
@@ -54,7 +54,7 @@
  *   that passed since it was last invoked and c.driveMicros() adds this to its running total and then subtracts one second 
  *   from whenever it moves the clock forward.
  *
- *   Additional detail on how the Bendulum and Clock objects work may be found in their respective libraries.
+ *   Additional detail on how the Escapement and Clock objects work may be found in their respective libraries.
  *
  *   Regulation and adjustment of the clock is controlled using one of the little red SparkFun IR remotes. The remote has 
  *   the following buttons and purposes:
@@ -71,8 +71,8 @@
  *           Right         Fast-forward the time display by the amount of the adjustment step
  *           Select        Start calibration mode (details below)
  *
- *   The size of the current adjustment step is indicated by the color of the LED. The colors and corresponding step 
- *   sizes are:
+ *   When adjustments are turned on, the size of the current adjustment step is indicated by the color of the LED. The colors 
+ *   and corresponding step sizes are:
  *
  *           Color     Meaning
  *           ========= ============================================================================================
@@ -83,7 +83,7 @@
  *           Blue      10 min
  *           Magenta   1 hr
  *
- *   When adjustment is turned off the LED is dark except for a flash marking each beat. Press Power to turn it back on. 
+ *   When adjustments are turned off the LED is dark except for a flash marking each beat. Press Power to turn it back on. 
  *   The LED flashes white each time a command is received from the remote control.
  *
  *   To regulate the clock, do something like the following. Set the hands of the clock to display approximately the 
@@ -91,10 +91,11 @@
  *   will start running. 
  *
  *   If this is the first time you've used this Arduino to run a clock, the EEPROM won't contain calibration information, 
- *   so the sketch will do a "cold start." It begins by characterizing how the magnet on the bendulum or pendulum interacts 
- *   with the coil. During this process the LED will blink yellow. Once magnet-coil interaction characterization is complete, 
- *   the clock will enter real-time clock (RTC) calibration mode, indicated by the LED flashing magenta. At this point you 
- *   should adjust the time-of-day display to show the same time as the accurate clock you'll use as the standard. 
+ *   so the sketch will do a "cold start." It begins by resetting all of the calibration infomration and then letting the 
+ *   pendulum or bendulum run for a while to let it settle down to regular operation. During this process the LED will 
+ *   blink yellow. Once warm up period is complete, the clock will enter real-time clock (RTC) calibration mode, indicated 
+ *   by the LED flashing magenta. At this point you should adjust the time-of-day display to show the same time as the 
+ *   accurate clock you'll use as the standard. 
  *
  *   To adjust the time-of-day display, turn on adjustments with the Power button. Then use the Left and Right buttons
  *   together with the adjustment step size buttons.
@@ -117,51 +118,54 @@
  *   appreciable error. Then calculate the clock error in seconds per day. Using the IR remote, turn on adjustments. Then 
  *   use the speed adjustment buttons (the Up and Down buttons) together with the step-size buttone to set the pending 
  *   speed adjustment to the number you calculated. Then turn adjustments off with the Power button. This causes the 
- *   speed adjustment to be stored in EEPROM.
+ *   RTC speed adjustment to be stored in EEPROM.
  *
- *   Next, change the time displayed on the clock so that it shows the correct time. Let the clock run to see how it does. 
- *   If further adjustment is needed, just repeat the process. After a few passes, you should have the Arduino's RTC clock 
- *   running as accurately as possible. Because the RTC for a given Arduino is pretty stable, you should only need to 
- *   calibrate it once.
+ *   Next, change the time displayed on the clock so that it once again shows the correct time. Let the clock run to see 
+ *   how it does. If further adjustment is needed, just repeat the process. After a few passes, you should have the 
+ *   Arduino's RTC running as accurately as possible. Because the RTC for a given Arduino is pretty stable, you should 
+ *   only need to calibrate it once.
  *
- *   Once the RTC is calibrated, it's time to exit RTC calibration and let the sketch characterize the operaqtion of the 
+ *   Once the RTC is calibrated, it's time to exit RTC calibration and let the sketch characterize the operation of the 
  *   pendulum or bendulum. To do this, turn on adjustments with the Power button and then press the B button to switch to 
  *   normal operation.
  *
  *   During normal operation, the clock will automatically calibrate its operation to conform with the beat rate of the
  *   pendulum or bendulum it is using. Since the beat rate will vary slightly as the temperature changes, it will
- *   calibrate its operation at each new temperature it encounters. When the LED is flashing green, the clock is being 
- *   driven by the pendulum or the bendulum. When it is flashing blue, the clock is using the RTC to determine the beat 
- *   rate at the current temperature. As the clock runs and the temperature varies, the rate at a wide range of 
- *   temperatures will be characterized and the flashing will be all green. At that point the clock is fully calibrated 
- *   and running accurately.
+ *   collect data about the pendulum or bendulum it's using at each new temperature it encounters. When the LED is 
+ *   flashing blue, the clock is using the RTC to determine the beat rate at the current temperature. When it is 
+ *   flashing green, the clock is being driven by the pendulum or the bendulum using data that has already been 
+ *   collected.  As the clock runs and the temperature varies, it will collect information about how the pendulum or 
+ *   bendulum rate varies with temeprature and will run accurately from then on.
  *
  *   Depending on the construction of the bendulum or pendulum "running accurately" can vary quite a bit. If the bendulum 
  *   or pendulum is well made and isolated from air currents, the clock should be at least as accurate as a traditional 
- *   household pendulum clock -- to within a minutes a week.
+ *   household pendulum clock -- to within a minute or so a week.
  *
  *   You can tweak the results of the automatic calibration manually, if it's a little off. To do so, turn on adjustments
  *   when the clock is running normally (the LED is flashing green or blue) and use the Up and Down buttons together with 
- *   the step-size buttons to enter a correction factor in seconds per day. When you save it by turning adjustments off,
- *   the correction factor will be saved and applied to the clock speed. Making a clock speed adjustment in this way only
+ *   the step-size buttons to enter a correction factor in seconds per day. When you turn the adjustments off, the 
+ *   correction factor will be saved and applied to the clock speed. Making a clock speed adjustment in this way only
  *   changes the clock speed, not the RTC calibration.
  *
  *   Normally when the Arduino is powered up, the sketch loads its calibration information from EEPROM. This means that 
  *   once the clock has been properly regulated, operation can pick up where it left off if the power fails or the sketch 
  *   is restarted for some other reason.
  * 
- *   Hot starting can save a lot of calibration work, but if you should ever want to "cold start" the whole process, simply 
- *   install the cold start jumper on the bendulum shield. This causes the sketch to ignore all the stored information when 
- *   it starts. With no stored information to go on, it goes through the same auto-calibration process it did the first time 
- *   the sketch ran. Once the calibration run is done, remove the jumper so that the sketch won't cold start every time it's
- *   started.
+ *   "Warm starting" like this can save a lot of calibration work, but if you should ever want to "cold start" the whole 
+ *   process, simply install the cold start jumper on the escapement shield. This causes the sketch to ignore all the 
+ *   stored information when it starts. With no stored information to go on, it goes through the same auto-calibration 
+ *   process it did the first time the sketch ran. Once data is collected for at least one temperature is done (you'll 
+ *   know because the flashing turns to green), remove the jumper so that the sketch won't cold start every time it's  
+ *   restarted.
  *
  *   If your clock has been running a while but you make a change to the benuluum or pendulum so that its beat duration
- *   changes, you'll need to recalibrate to determine the new rate. This is most easily done by hot starting the clock and 
- *   then pressing the Select button. This will put the clock into RTC calibration mode and turn adjustments off. Next turn
- *   adjustments on again and press Select a second time. This puts the clock into "warm start" mode. It will begin by 
- *   determining  how the magnet and coil interact (yellow flashing) and then move into normal operation, (blue and green 
- *   flashing) as it does the calibration over at each temperature it encounters. Also see http://xkcd.com/1421/ .
+ *   changes, you'll need to recalibrate to determine the new rate. This is most easily done by warm starting the clock 
+ *   and then pressing the Select button. This will put the clock into RTC calibration mode and turn adjustments off. 
+ *   Next turn adjustments on again and press Select a second time. This initiates the recalibration process. It will 
+ *   begin by letting the pendulum or bendulum settle down (yellow flashing) and then move into normal operation, (blue 
+ *   and then green flashing) as it does the calibration over at each temperature it encounters. 
+ *
+ *   Also see http://xkcd.com/1421/ .
  *
  ****/
 
@@ -208,12 +212,19 @@
  * Other constants
  *
  ****/
-#define VERSION_STRING F("BendulumClock v1.16.") // Name and version of this sketch
+#define VERSION_STRING F("BendulumClock v1.20.") // Name and version of this sketch
 #define COLD_BEAT_COLOR   RGB_LED_RED            // The cold start flash color is red
 #define WARM_BEAT_COLOR   RGB_LED_YELLOW         // The warm start flash color is yellow
 #define CAL_BEAT_COLOR    RGB_LED_BLUE           // The calibration flash color is blue
 #define NORMAL_BEAT_COLOR RGB_LED_GREEN          // The normal beat flash color is green
 #define RTC_BEAT_COLOR    RGB_LED_MAGENTA        // The RTC calibration flash color is magenta
+
+/****
+ *
+ * Uncomment to make the clock more verbose about what's going on
+ *
+ ****/
+//#define VERBOSE
 
 /****
  *
@@ -231,7 +242,7 @@ const long stepSize[6] = {                       // The adjustment stepsize in t
 boolean adjustable = false;                      // Whether the adjustments are enabled (by Power button)
 boolean adjRTC = false;                          // Whether speedAdj is to be applied to the real-time clock
 long speedAdj = 0;                               // The amount of the pending speed adjustment in tenths of a second; 0 if none
-byte ledBeatColor = RGB_LED_BLACK;
+byte ledBeatColor = RGB_LED_BLACK;               // The color of the flash marking a beat
 
 /****
  *
@@ -265,7 +276,7 @@ void setup() {
       Serial.println(F(" s/day"));
       break;
 
-    case CALSTART:                               //   Recalibrating
+    case CALIBRATE:                               //   Recalibrating
       Serial.println(F("Auto calibrating."));
       break;
   }
@@ -331,7 +342,7 @@ void fB() {
     c.cancelDrive();
     if (adjRTC && speedAdj == 0) {               // If doing RTC calibration and no speed adjustment, cancel RTC calibration
       adjRTC = false;
-      e.setRunMode(RUN);
+      e.setRunMode(MODEL);
       ledBeatColor = NORMAL_BEAT_COLOR;
     } else {                                     // Otherwise just cancl adjustment
       speedAdj = 0;
@@ -415,7 +426,7 @@ void fSelect () {
   if (adjustable) {
     if (adjRTC) {
       adjRTC = false;                              //   If in RTC calibration switch to warm start
-      e.setRunMode(CALSTART);
+      e.setRunMode(CALIBRATE);
     } else {                                       //   Otherwise switch to RTC calibration mode
       adjRTC = true;
       e.setRunMode(CALRTC);
@@ -440,6 +451,7 @@ void loop() {
   static void (*fPointer[])() = {fPower,      fA,      fB,      fC,      fUp,      fDown,      fLeft,      fRight,      fSelect};
   static int codeCount = sizeof(code)/sizeof(code[0]);
   byte cix;                                            // Current led color
+  byte runMode = e.getRunMode();                       // The mode the escapement is currently in
 
   c.driveMicros(e.beat());                             // Let the bendulum do its thing, move the clock forward however long it took
   if (remote.onButton(code, fPointer, codeCount)) {    // If an IR remote buttonwas pushed
@@ -455,72 +467,84 @@ void loop() {
     led.setColor(RGB_LED_BLACK);
   }
 
-  switch (e.getRunMode()) {                          //   Do things based on the current "run mode"
+  switch (runMode) {                                 //   Do things based on the current "run mode"
     case COLDSTART:                                  //   When cold starting
-      Serial.print(F("Cold started"));               //    Just say that's what we're doing
+      Serial.println(F("Cold started"));             //    Just say that's what we're doing
       ledBeatColor = COLD_BEAT_COLOR;
       break;
     case WARMSTART:                                  //   When settling in
+#ifdef VERBOSE
       Serial.print(F("Warming "));                   //    Say how far along we've gotten in our warm up
       Serial.print(e.getBeatCounter());
       Serial.print(F(", delta "));                   //    Display the ratio of tick duration to tock duration
       Serial.print(e.getDelta(), 4);
       Serial.print(F(", current bpm "));             //      the measured beats per minute
-      Serial.print(e.getCurBpm(), 4);
+      Serial.println(e.getBpmRTC(), 4);
+#endif
       ledBeatColor = WARM_BEAT_COLOR;
       break;
-    case CALSTART:
-      Serial.println(F("Starting calibration"));
+    case CALIBRATE:
+      Serial.println(F("Starting new calibration"));
       ledBeatColor = CAL_BEAT_COLOR;
       break;
-    case CALIBRATE:                                  //   When calibrating
-      Serial.print(F("Calibrating "));               //     Say how much smoothing We've been
-      Serial.print(e.getSmoothing());                //       able to do so far,
+    case COLLECT:                                  //   When collecting data
+#ifdef VERBOSE
+      Serial.print(F("Collecting data "));           //     Say how many samples we've been
+      Serial.print(e.getSmoothing());                //       able to collect so far,
       Serial.print(F(", delta "));                   //       how symmetrical "ticks" and"tocks" are currently,
       Serial.print(e.getDelta(), 4);                 //       what the current beat's bpm is as measured by the RTC, 
-      Serial.print(F(", current bpm "));             //       what the average bpm so far is,
-      Serial.print(e.getCurBpm(), 4);
-      Serial.print(F(", average bpm "));
-      Serial.print(e.getAvgBpm(), 4);
+      Serial.print(F(", current bpm "));             //       what the modeled bpm so far is,
+      Serial.print(e.getBpmRTC(), 4);
       if (e.isTempComp()) {
         Serial.print(F(", temp "));                  //       and the temperature, if running temp compensated
         Serial.print(e.getTemp(), 4);
         Serial.print(F(" C"));
       }
+      Serial.println(F(""));
+#endif
       ledBeatColor = CAL_BEAT_COLOR;
       break;
-    case CALFINISH:                                  //   When finished calibrating
-      Serial.print(F("Finished calibrating. "));
+    case MODEL:                                      //   When a model is made
+      Serial.print(F("Model "));
+      Serial.print(F("uspb = "));
+      Serial.print(e.getM());
+      Serial.print(F(" * t + "));
+      Serial.print(e.getB());
+      Serial.print(F(", model bpm "));
+      Serial.print(e.getBpmModel(), 4);
       if (e.isTempComp()) {
-        Serial.print(F("Temp: "));
+        Serial.print(F(", Temp: "));
         Serial.print(e.getTemp(), 4);
-        Serial.print(F(" C, "));
+        Serial.print(F(" C"));
       }
-      Serial.print(F("average bpm "));
-      Serial.print(e.getAvgBpm(), 4);
+      Serial.println(F(""));
       break;
     case RUN:                                        //   When running
-      Serial.print(F("Running. Cal bpm "));          //     Say that we're running along normally, 
-      Serial.print(e.getBeatBpm(), 4);               //       what the calibrated beats per minute is,
-      Serial.print(F(", current bpm "));             //       what the currentl real-time clock measured bpm is,
-      Serial.print(e.getCurBpm(), 4);
+#ifdef VERBOSE
+      Serial.print(F("Running. Model bpm "));        //     Say that we're running along normally, 
+      Serial.print(e.getBpmBeat(), 4);               //       what the modeled beats per minute is,
+      Serial.print(F(", current bpm "));             //       what the current real-time clock measured bpm is,
+      Serial.print(e.getBpmRTC(), 4);
       if (e.isTempComp()) {                          //       and, if running temp compensated, 
         Serial.print(F(", temp "));
         Serial.print(e.getTemp(), 4);                //       the temperature reading.
         Serial.print(F(" C"));
       }
+      Serial.println(F(""));
+#endif
       ledBeatColor = NORMAL_BEAT_COLOR;
       break;
     case CALRTC:                                     //   When calibrating the real-time clock
+#ifdef VERBOSE
       Serial.print(F("Calibrating RTC. Corr: "));    //     Say that we're calibrating the RTC,
       Serial.print(e.getBias()/10.0, 1);             //       what the current bias is,
       Serial.print(F(" sec, delta "));               //       how symmetrical "ticks" and "tocks" are currently,
       Serial.print(e.getDelta(), 4);                 //       what the current beat's bpm is as measured by the RTC, 
       Serial.print(F(", current Bpm: "));
-      Serial.print(e.getCurBpm(), 4);                //       and what the current bpm is
+      Serial.println(e.getBpmRTC(), 4);              //       and what the bpm is as measured by the RTC
+#endif
       ledBeatColor = RTC_BEAT_COLOR;
       break;
   }
-  Serial.println(F("."));
 }
 
