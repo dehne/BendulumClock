@@ -8,7 +8,7 @@
  *
  ****/ 
 
-#define SKETCH_ID  F("Dump BendulumClock EEPROM. V0.85")
+#define SKETCH_ID  F("Dump BendulumClock EEPROM. V0.86")
 
 #include <Escapement.h>                        // Escapement library (needed for settings_t definition)
 #include <avr/eeprom.h>                        // EEPROM read write library
@@ -25,19 +25,19 @@ void setup() {
   Serial.print(eeprom.id, HEX);
   Serial.print(F(", bias: "));                 // Print bias
   Serial.print(eeprom.bias/10.0, 1);
-  Serial.print(F(" sec/day, deltaUspb: "));    // Print deltaUspb
-  Serial.print(eeprom.deltaUspb);
-  Serial.print(F(" usec, "));
+  Serial.print(F(" sec/day, speedAdj: "));    // Print speedAdj
+  Serial.print(eeprom.speedAdj/10.0);
+  Serial.print(F(" s/d, "));
   if (eeprom.compensated) {
     Serial.println(F("temperature compensated. Calibration:"));
-    Serial.println(F("Temp\tus/b\tSmoothing"));
+    Serial.println(F("Temp\tus/b\tsampleCount"));
     for (int i = 0; i < TEMP_STEPS; i++) {
       if (eeprom.uspb[i] > 0) {
         Serial.print(TEMP_MIN + 0.5 * i);
         Serial.print(F("\t"));
         Serial.print(eeprom.uspb[i]);
         Serial.print(F("\t"));
-        Serial.println(eeprom.curSmoothing[i]);
+        Serial.println(eeprom.sampleCount[i]);
       }
     }
     float xSum = 0.0;				//   Have a go at calculating the linear least squares for the data so far
@@ -48,7 +48,7 @@ void setup() {
     float yIntercept;
     int count = 0;
     for (int i = 0; i < TEMP_STEPS; i++) {
-      if (eeprom.curSmoothing[i] > TGT_SMOOTHING) {
+      if (eeprom.sampleCount[i] > TGT_SAMPLES) {
         float x = (((TEMP_MIN << 1) + i) << 7);
         float y = eeprom.uspb[i];
         count++;
@@ -68,10 +68,10 @@ void setup() {
     }
   } else {
     Serial.print(F("not temperature compensated, Calibration: "));
-    Serial.println(F("us/b\tSmoothing"));
+    Serial.println(F("us/b\sampleCount"));
     Serial.print(eeprom.uspb[0]);
     Serial.print(F("\t"));
-    Serial.println(eeprom.curSmoothing[0]);
+    Serial.println(eeprom.sampleCount[0]);
   }
 }
 

@@ -1,8 +1,8 @@
 /****
  *
- *   BendulumClock v1.20
+ *   BendulumClock v1.21
  *
- *   Copyright 2014-2015 by D. L. Ehnebuske 
+ *   Copyright 2014-2016 by D. L. Ehnebuske 
  *   License terms: Creative Commons Attribution-ShareAlike 3.0 United States (CC BY-SA 3.0 US) 
  *                  See http://creativecommons.org/licenses/by-sa/3.0/us/ for specifics. 
  *
@@ -272,7 +272,7 @@ void setup() {
 
     case WARMSTART:                              //   Warm starting
       Serial.print(F("Warm starting with manual adjustment of "));
-      Serial.print(e.getBeatDelta()/10.0, 1);
+      Serial.print(e.getSpeedAdj()/10.0, 1);
       Serial.println(F(" s/day"));
       break;
 
@@ -306,9 +306,9 @@ void fPower() {
         Serial.print(F("Changing clock speed by: "));
         Serial.print(speedAdj/10.0, 1);
         Serial.print(F(" s/day from "));
-        Serial.print(e.getBeatDelta()/10.0, 1);
+        Serial.print(e.getSpeedAdj()/10.0, 1);
         Serial.print(F(" s/day to "));
-        Serial.print(e.incrBeatDelta(speedAdj)/10.0, 1);
+        Serial.print(e.incrSpeedAdj(speedAdj)/10.0, 1);
         Serial.println(F(" s/day."));
       }
     speedAdj = 0;
